@@ -1,94 +1,103 @@
 let centerXs = [70, 490, 320, 430, 240, -20]; 
 let centerYs = [70, 490, 130, 240, 430, 370]; 
-let circle1Xs = [210, 540, 130]; //First circle group X coordinate array
-let circle1Ys = [20, 350, 320]; // First circle group Y coordinate array
-let circle2Xs = [350, 480, 280, 20]; // Second circle group X coordinate array
-let circle2Ys = [540, 100, 280, 215]; // Second circle group Y coordinate array
-let circle3Xs = [175, 385, 370, 90]; // Third circle group X coordinate array
-let circle3Ys = [175, 385, -15, 470]; //Third circle group Y coordinate array
-
-let pg;
+let circle1Xs = [210, 540, 130]; 
+let circle1Ys = [20, 350, 320]; 
+let circle2Xs = [350, 480, 280, 20]; 
+let circle2Ys = [540, 100, 280, 215]; 
+let circle3Xs = [175, 385, 370, 90]; 
+let circle3Ys = [175, 385, -15, 470]; 
 
 
-//Get the minimum window size
+
+let pg; // Drawing Object
+let numSegments = 50; // Number of image segments
+let segments = []; // Split image array
+let drawSegments = true; 
+let isInit = false; 
+let originalWidth, originalHeight; // Original width and height
+let originalSegments = []; // Original segmented image array
+// Get the minimum window size
 function minWindowSize() {
     return min(windowWidth, windowHeight);
 }
 
+//Random colors
 function randomColor() {
     return color(random(255), random(255), random(255));
 }
 
+
 function setup() {
     let Size = minWindowSize(); 
-    createCanvas(Size, Size); 
+    createCanvas(Size, Size); // Create Canvas
 
-    pg = createGraphics(Size, Size); 
+    pg = createGraphics(Size, Size); //Create drawing objects
     originalWidth = Size; 
     originalHeight = Size; 
 
     pg.background(0, 84, 121); 
-    isInit = false; 
-    generateGraphicsAndSegments(); 
+    isInit = false; // Set initialization status
+    generateGraphicsAndSegments(); // Generating images and segmentation
 }
 
-//Generating images and segmentation
+// Generating images and segmentation
 function generateGraphicsAndSegments() {
     pg.background(0, 84, 121); 
     let Size = minWindowSize(); 
 
     pg.push(); // Save the current drawing state
-    pg.scale(Size / 500); // Zoom drawing
-    for (let i = 0; i < centerXs.length; i++) { 
+    pg.scale(Size / 500); 
+    for (let i = 0; i < centerXs.length; i++) {
         let x = centerXs[i];
         let y = centerYs[i];
         pg.fill(color(random(180, 255), random(180, 255), random(180, 255))); 
-        pg.stroke(randomColor());
+        pg.stroke(randomColor()); 
         pg.strokeWeight(random(1, 4)); 
-        pg.circle(x, y, 140); // Draw circle
+        pg.circle(x, y, 140); // Draw a circle
 
         drawChain(x, y, 80, 20); //Draw a chain
         drawConcentricCircles(x, y, 60, 8); // Draw concentric circles
 
         circleRing(x, y); // Draw a circular ring
 
-        if (random() < 0.2) { // Randomly draw curves
+        if (random() < 0.2) { // Draw random curves
             drawPinkCurve(x, y, 75);
         }
     }
 
-    for (let i = 0; i < circle1Xs.length; i++) { //Coordinates of the first circle group
+    ///Traverse the coordinates of the first circle group
+    for (let i = 0; i < circle1Xs.length; i++) { 
         let x = circle1Xs[i];
         let y = circle1Ys[i];
-        Circle1(x, y); //Draw the first circle
-        drawChain(x, y, 75, 15); // Draw a chain
-
+        Circle1(x, y); 
+        drawChain(x, y, 75, 15); 
         if (random() < 0.2) { 
             drawPinkCurve(x, y, 75);
         }
     }
-
-    for (let i = 0; i < circle2Xs.length; i++) { // Coordinates of the second circle group
+    ////Traverse the coordinates of the second circle group
+    for (let i = 0; i < circle2Xs.length; i++) { 
         let x = circle2Xs[i];
         let y = circle2Ys[i];
-        Circle2(x, y); //Draw the second circle
+        Circle2(x, y); 
         drawChain(x, y, 75, 20); 
 
-        if (random() < 0.2) { 
+        if (random() < 0.2) {
             drawPinkCurve(x, y, 75);
         }
     }
-
-    for (let i = 0; i < circle3Xs.length; i++) { // Coordinates of the third circle group
+    
+    ////Traverse the coordinates of the third circle group
+    for (let i = 0; i < circle3Xs.length; i++) { 
         let x = circle3Xs[i];
         let y = circle3Ys[i];
         pg.fill(color(random(180, 255), random(180, 255), random(180, 255))); 
         drawChain(x, y, 75, 15); 
-        pg.circle(x, y, 140); 
-        Circle3(x, y); // circle 3
+        pg.circle(x, y, 140);
+        Circle3(x, y); 
         pg.fill(randomColor()); 
-        pg.circle(x, y, 60); // 
-        drawConcentricCircles(x, y, 30, 5); // Concentric circle
+        pg.circle(x, y, 60);
+        drawConcentricCircles(x, y, 30, 5); 
 
         if (random() < 0.2) { 
             drawPinkCurve(x, y, 75);
@@ -97,38 +106,56 @@ function generateGraphicsAndSegments() {
     pg.pop(); // Restore drawing status
 
 
-    isInit = true; // Set initialization status
+    let segmentWidth = pg.width / numSegments; // Calculate the division width
+    let segmentHeight = pg.height / numSegments; // Calculate segmentation height
+    segments = []; // Clear split array
+
+    for (let segYPos = 0; segYPos < pg.height; segYPos += segmentHeight) { // Traversing segmented images
+
+        for (let segXPos = 0; segXPos < pg.width; segXPos += segmentWidth) {
+            let segmentColour = pg.get(segXPos + segmentWidth / 2, segYPos + segmentHeight / 2); // Get Split Color
+            let segment = new ImageSegment(segXPos, segYPos, segmentWidth, segmentHeight, segmentColour); // Create split image objects
+            segments.push(segment); // Add split image to array
+        }
+    }
+    originalSegments = segments.map(seg => new ImageSegment(seg.srcImgSegXPos, seg.srcImgSegYPos, seg.srcImgSegWidth, seg.srcImgSegHeight, seg.srcImgSegColour)); // Copy the original segmented image array
+    isInit = true; 
+
+
+
+
 }
 
-// Draw a circular ring
+//Draw a circular ring
 function circleRing(centerX, centerY) {
     let radius = 35; 
     let numRects = 20; 
     let rectWidth = 5; 
     let rectHeight = 7; 
     let cornerRadius = 8; 
-    let layerNum = random(4, 6)
-    let s = 5 / layerNum; // Scale factor
+    let layerNum = random(4, 6); 
+    let s = 5 / layerNum; 
     pg.fill(randomColor()); 
     pg.stroke(0, 0); 
-    for (let a = 0; a < layerNum; a++) { 
+    for (let a = 0; a < layerNum; a++) {
 
         for (let i = 0; i < numRects; i++) {
-            let angle = TWO_PI / numRects * i; 
+            let angle = TWO_PI / numRects * i;
             let x = centerX + cos(angle) * radius; 
             let y = centerY + sin(angle) * radius; 
 
-            pg.push(); // Save drawing status
+            pg.push(); 
             pg.translate(x, y); 
             pg.rotate(angle); 
-            pg.rectMode(CENTER); // Set rectangular mode as center
+            pg.rectMode(CENTER); 
             pg.rect(0, 0, rectWidth * s, rectHeight * s, cornerRadius); 
-            pg.pop(); //Restore drawing status
+            pg.pop(); 
         }
-        radius = radius + 32 / layerNum; // Increase radius
-        numRects = numRects + 3; // Increase the number of rectangles
+        radius = radius + 32 / layerNum; 
+        numRects = numRects + 3; 
     }
 }
+
 
 // Draw concentric circles
 function drawConcentricCircles(centerX, centerY, maxDiameter, numCircles) {
@@ -145,11 +172,11 @@ function drawConcentricCircles(centerX, centerY, maxDiameter, numCircles) {
         }
         pg.stroke(randomColor()); 
         pg.strokeWeight(random(0, 5)); 
-        pg.ellipse(centerX + offsetX, centerY + offsetY, diameter, diameter); // Draw an ellipse
+        pg.ellipse(centerX + offsetX, centerY + offsetY, diameter, diameter);
     }
 }
 
-//Draw dots
+// Draw dots
 function drawCircleDots(centerX, centerY, radius, numDots, dot) {
     let angleStep = TWO_PI / numDots; 
     pg.fill(randomColor()); 
@@ -158,7 +185,7 @@ function drawCircleDots(centerX, centerY, radius, numDots, dot) {
         let angle = i * angleStep; 
         let x = centerX + cos(angle) * radius; 
         let y = centerY + sin(angle) * radius; 
-        pg.ellipse(x, y, dot, dot);
+        pg.ellipse(x, y, dot, dot); 
     }
 }
 
@@ -172,25 +199,27 @@ function drawCircleLines(centerX, centerY, startRadius, numLines, lineLength) {
         let yStart = centerY + sin(angle) * startRadius; 
         let xEnd = centerX + cos(angle) * (startRadius + lineLength); 
         let yEnd = centerY + sin(angle) * (startRadius + lineLength); 
-        pg.line(xStart, yStart, xEnd, yEnd); 
+        pg.line(xStart, yStart, xEnd, yEnd);
     }
 }
 
 // Draw the first circle
 function Circle1(centerX, centerY) {
-    let baseRadius = 30;
+    let baseRadius = 30; 
     let radiusIncrement = 5; 
     let numLayers = 4; 
+
     pg.fill(255, 204, 0); 
     pg.noStroke(); 
     pg.circle(centerX, centerY, 140); 
+
     pg.fill(randomColor()); 
     pg.noStroke(); 
-    pg.circle(centerX, centerY, 70);
+    pg.circle(centerX, centerY, 70); 
 
     for (let i = 0; i < numLayers; i++) { 
-        drawCircleDots(centerX, centerY, baseRadius + i * radiusIncrement, 30 + i * 7, 5); // Draw dots
-        drawCircleLines(centerX, centerY, 30 + numLayers * radiusIncrement, 200, 20); //Draw circular lines
+        drawCircleDots(centerX, centerY, baseRadius + i * radiusIncrement, 30 + i * 7, 5); 
+        drawCircleLines(centerX, centerY, 30 + numLayers * radiusIncrement, 200, 20); 
     }
 }
 
@@ -201,11 +230,14 @@ function Circle2(centerX, centerY) {
     let radiusStep = 4; 
     let initialNumDots = 40; 
     let dotsIncrement = 6; 
+
     pg.fill(randomColor()); 
     pg.noStroke(); 
     pg.circle(centerX, centerY, 140); 
+
     pg.fill(randomColor()); 
     pg.ellipse(centerX, centerY, 30, 30); 
+
     for (let i = 0; i < numLayers; i++) { 
         let radius = initialRadius + i * radiusStep; 
         let numDots = initialNumDots + i * dotsIncrement; 
@@ -215,15 +247,16 @@ function Circle2(centerX, centerY) {
 
 // Draw the third circle
 function Circle3(centerX, centerY) {
-    let innerRadius = 35; 
-    let outerRadius = 65; 
-    let numPoints = 120; 
-    let points = []; 
-    for (let i = 0; i < numPoints; i++) { 
+    let innerRadius = 35;
+    let outerRadius = 65;
+    let numPoints = 120;
+    let points = [];
+
+    for (let i = 0; i < numPoints; i++) {
         let angle = TWO_PI / numPoints * i; 
-        if (i % 2 == 0) { 
-            let x = centerX + cos(angle) * innerRadius; //Calculate the X coordinate
-            let y = centerY + sin(angle) * innerRadius; //Calculate the Y coordinate
+        if (i % 2 == 0) {
+            let x = centerX + cos(angle) * innerRadius; 
+            let y = centerY + sin(angle) * innerRadius; 
             points.push(createVector(x, y)); 
         } else {
             let x = centerX + cos(angle) * outerRadius; 
@@ -234,29 +267,31 @@ function Circle3(centerX, centerY) {
     pg.strokeWeight(1); 
     pg.stroke(randomColor()); 
     pg.noFill(); 
+
     pg.beginShape(); 
-    for (let p of points) 
-        { vertex(p.x, p.y); }
+    for (let p of points) {
+        vertex(p.x, p.y); 
+    }
     pg.endShape(CLOSE); 
 }
 
 // Draw a pink curve
 function drawPinkCurve(centerX, centerY, radius) {
     let angle = random(TWO_PI); 
-    let x1 = centerX + cos(angle) * radius; // Calculate the X coordinate of the endpoint
-    let y1 = centerY + sin(angle) * radius; // Calculate the Y coordinate of the endpoint
-    let cp1x = centerX + cos(angle + PI / 4) * radius / 2; //Calculate the X-coordinate of the control point
-    let cp1y = centerY + sin(angle + PI / 4) * radius / 2; // Calculate the Y-coordinate of the control point
+    let x1 = centerX + cos(angle) * radius; // 
+    let y1 = centerY + sin(angle) * radius; // 
+    let cp1x = centerX + cos(angle + PI / 4) * radius / 2; // 
+    let cp1y = centerY + sin(angle + PI / 4) * radius / 2; // 
 
     pg.stroke(255, 105, 180); 
     pg.strokeWeight(3); 
     pg.noFill(); 
-    pg.bezier(centerX, centerY, cp1x, cp1y, cp1x, cp1y, x1, y1); // Draw a Bezier curve
+    pg.bezier(centerX, centerY, cp1x, cp1y, cp1x, cp1y, x1, y1); 
 }
 
 // Draw Chain
 function drawChain(centerX, centerY, chainRadius, numLinks) {
-    let angleStep = TWO_PI / numLinks; // Calculate angle step size
+    let angleStep = TWO_PI / numLinks; //
     for (let i = 0; i < numLinks; i++) { 
         let angle = i * angleStep; 
         let x = centerX + cos(angle) * chainRadius; 
@@ -268,29 +303,60 @@ function drawChain(centerX, centerY, chainRadius, numLinks) {
     }
 }
 
-// Move the mouse to control the flashing speed
 function draw() {
     background(0); 
 
     if (isInit == false) { // Determine whether to initialize
-        generateGraphicsAndSegments(); // Generating images and segmentation
+        generateGraphicsAndSegments(); //Generating images and segmentation
     }
-    let time = map(mouseX,0,width,0,60); // Map time based on mouse X positionMap time based on mouse X position
+    let time = map(mouseX,0,width,0,60); // Map time based on mouse X position
 
+    console.log(time); 
     if (frameCount % int(time) === 0) { // Determine whether to regenerate the image
-        generateGraphicsAndSegments(); // Generating images and segmentation
+        generateGraphicsAndSegments(); 
     }
-    image(pg,0,0);
+
+
+    if (drawSegments) { // Determine whether to draw a segmented image
+        for (const segment of segments) { 
+         
+            segment.draw(); 
+        }
+    } else {
+        image(pg, 0, 0, width, height); 
+    }
 }
 
+// Keyboard press event
+function keyPressed() {
+    if (key == " ") { // Check the space bar
+        drawSegments = !drawSegments; // Switch drawing mode
+    }
+}
 
-// Window Resizing
+// Window Resizing Event
 function windowResized() {
-    let Size = minWindowSize(); //Calculate the minimum window size
-    resizeCanvas(Size, Size); // Canvas Size 
+    let Size = minWindowSize(); 
+    resizeCanvas(Size, Size); 
     pg.resizeCanvas(Size, Size); 
 
-    isInit = false; // Reset initialization flag
+    isInit = false; 
 }
 
+// Image segmentation class
+class ImageSegment {
 
+    constructor(srcImgSegXPosInPrm, srcImgSegYPosInPrm, srcImgSegWidthInPrm, srcImgSegHeightInPrm, srcImgSegColourInPrm) {
+        this.srcImgSegXPos = srcImgSegXPosInPrm; 
+        this.srcImgSegYPos = srcImgSegYPosInPrm; 
+        this.srcImgSegWidth = srcImgSegWidthInPrm;
+        this.srcImgSegHeight = srcImgSegHeightInPrm;
+        this.srcImgSegColour = srcImgSegColourInPrm;
+        this.scale = 1; 
+    }
+    draw() {
+        stroke(0); // Set black lines
+        fill(this.srcImgSegColour); 
+        rect(this.srcImgSegXPos, this.srcImgSegYPos, this.srcImgSegWidth * this.scale, this.srcImgSegHeight * this.scale); 
+    }
+}
