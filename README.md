@@ -1,11 +1,20 @@
 # ygon0450_Individual-Task
 
 ## Interactive explanation
-I choose "User Input: Incorporate mouse or keyboard inputs for animation" to drive my individual code.
-
 I have created a total of 3 effects, effect 1 is that when the mouse is moved from left to right, the page refresh speed changes from fast to slow. Effect 2 is that when the spacebar is pressed, the page will change its style and transform into a pixel like effect. Effect 3 is to scale the distance with the mouse cursor, and the farther the distance, the larger they will be.
 
-## technical explanation
+## Individual Approach
+I choose "User Input: Incorporate mouse or keyboard inputs for animation" to drive my individual code.
+
+My idea is to extend our group's initial ideas through the "User Input" method I have chosen. So I created a way to speed up or slow down page refresh by moving the mouse from left to right. I make the page automatically refresh and change the speed by adding mouse control. But after the group discussion, I found that the principle of my creation was somewhat similar to that of a member, so I added keyboard control. Using the spacebar to transform the original work into a rectangular split like pixel effect is my favorite effect I learned in this course, so I added it to my work. I also added the interactive effects extended from week 7.
+
+My idea is to extend our group's initial ideas through the "User Input" method I have chosen. So I created a way to speed up or slow down page refresh by moving the mouse from left to right. I make the page automatically refresh and change the speed by adding mouse control. But after the group discussion, I found that the principle of my creation was somewhat similar to that of a member, so I added keyboard control. Using the spacebar to transform the original work into a rectangular split like pixel effect is my favorite effect I learned in this course, so I added it to my work. I also added interactive effects extended from Week 7, where the farther the mouse moves, the larger they become.
+
+ ![References of inspiration ](image/1.png)
+  ![References of inspiration ](image/2.png)
+
+
+## Technical Explanation
 **1. Regenerating dynamic backgrounds and segmented images**
 Use frameCount and mouseX to dynamically adjust the frequency of regenerating background images. This is achieved by mapping mouseX to a time value and then calling generateGraphicsAndSegments() when the frame at that time interval is reached. This method correlates the changes in the background image with the mouse movement speed.
 
